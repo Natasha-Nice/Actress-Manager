@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Actress Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #actressList {
+            background: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        #actressList li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        #actressList li:last-child {
+            border-bottom: none;
+        }
+        .focus-effect:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        #charCounter {
+            font-size: 14px;
+            color: #555;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Actress Manager</h1>
+
+<!-- Search Section -->
+<div class="tooltip">
+    <input type="text" id="searchInput" class="focus-effect" placeholder="Search actress..." maxlength="50">
+    <span class="tooltip-text">Type to search actresses</span>
+</div>
+<button onclick="searchActress()">Search</button>
+
+<!-- Add/Remove Section -->
+<div class="tooltip">
+    <input type="text" id="nameInput" class="focus-effect" placeholder="Add/Remove actress..." maxlength="30" oninput="updateCharCount()">
+    <span class="tooltip-text">Add or remove actress</span>
+    <div id="charCounter">0 / 30</div>
+</div>
+<button onclick="addActress()">Add</button>
+<button onclick="removeActress()">Remove</button>
+<button onclick="copyToClipboard()">Copy Input</button>
+
+<!-- List Display -->
+<h2>Actresses List</h2>
+<ol id="actressList"></ol>
+
+<script>
+    // Initial List
+    const actresses = [
+  "BRIDGETTE B", "PHOENIX MARIE", "ARIELLA FERRERA", "EVA NOTTY", "AVA ADDAMS",
+  "NATASHA NICE", "CHERIE DEVILLE", "NATALY ORDONEZ", "RICHELLE RYAN", "LELA STAR",
+  "LISA ANN", "ROMI RAIN", "RACHEL STARR", "RYAN CONNER", "ANGELA WHITE", "SOFIA ROSE",
+  "ANGIE FAITH", "SYBIL STALLONE", "SOFIA LEE", "SOPHIE DEE", "REAGAN FOXX",
+  "JASMINE JAE", "ALEXIS FAWX", "GABBIE CARTER"
+];
+    
+    let uniqueSortedActresses = [...new Set(actresses)].sort();
+
+    // Auto-focus on page load
+    window.onload = () => document.getElementById('searchInput').focus();
+
+    // Focus on key press ('/')
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+    });
+
+    // Focus navigation (move to next input)
+    document.querySelectorAll('input').forEach((input, index, inputs) => {
+        input.addEventListener('input', () => {
+            if (input.value.length === input.maxLength && inputs[index + 1]) {
+                inputs[index + 1].focus();
+            }
+        });
+    });
+
+    // Update character counter
+    function updateCharCount() {
+        const input = document.getElementById("nameInput");
+        document.getElementById("charCounter").textContent = `${input.value.length} / ${input.maxLength}`;
+    }
+
+    // Submit on Enter
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            addActress();
+        }
+    });
+
+    // Display list
+    function displayList() {
+        const list = document.getElementById("actressList");
+        list.innerHTML = '';
+        uniqueSortedActresses.forEach((actress, i) => {
+            const li = document.createElement("li");
+            li.textContent = `${i + 1}. ${actress}`;
+            list.appendChild(li);
+        });
+    }
+
+    // Add Actress
+    function addActress() {
+        const name = document.getElementById("nameInput").value.trim();
+        if (!name) return alert("Enter a name to add.");
+        if (!uniqueSortedActresses.includes(name)) {
+            uniqueSortedActresses.push(name);
+            uniqueSortedActresses.sort();
+            displayList();
+        } else {
+            alert("Actress already exists.");
+        }
+        document.getElementById("nameInput").value = '';
+        updateCharCount();
+    }
+
+    // Remove Actress
+    function removeActress() {
+        const name = document.getElementById("nameInput").value.trim();
+        const index = uniqueSortedActresses.indexOf(name);
+        if (index !== -1) {
+            uniqueSortedActresses.splice(index, 1);
+            displayList();
+        } else {
+            alert("Actress not found.");
+        }
+        document.getElementById("nameInput").value = '';
+        updateCharCount();
+    }
+
+    // Search Actress
+    function searchActress() {
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const results = uniqueSortedActresses.filter(name => name.toLowerCase().includes(query));
+        alert(`Found: ${results.join(", ") || "No matches"}`);
+    }
+
+    // Copy to clipboard
+    function copyToClipboard() {
+        const input = document.getElementById("nameInput");
+        navigator.clipboard.writeText(input.value).then(() => {
+            alert("Copied to clipboard!");
+        });
+    }
+
+    // Initial Display
+    displayList();
+</script>
+
+</body>
+</html>
